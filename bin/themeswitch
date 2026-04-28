@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# themeswitch — wall in, full theme out. Replaces HyDe themepatcher mess.
+set -euo pipefail
+
+WALL="${1:-}"
+[[ -z "$WALL" || ! -f "$WALL" ]] && {
+  WALL="$(find "$HOME/Pictures/walls" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.png' \) | shuf -n1)"
+}
+[[ -f "$WALL" ]] || { echo "no wallpaper"; exit 1; }
+
+CACHE="$HOME/.cache/hyprmuzo"
+mkdir -p "$CACHE"
+echo "$WALL" > "$CACHE/current_wall"
+
+# 1. set wallpaper via swww (fallback hyprpaper)
+if command -v swww >/dev/null; then
+  pgrep -x swww-daemon >/dev/null || swww-daemon &
+  sleep 0.2
+  swww img "$WALL" --transition-type any --transition-duration 1 --transition-fps 60
+elif command -v hyprpaper >/dev/null; then
+  cat > "$HOME/.config/hypr/hyprpaper.conf" <<EOF
+preload = $WALL
+wallpaper = ,$WALL
+splash = false
+EOF
+  pkill hyprpaper || true
+  hyprpaper &
+fi
+
+# 2. generate colors
+matugen image "$WALL"
+
+# 3. reload apps
+pkill -SIGUSR2 waybar 2>/dev/null || (pkill waybar; waybar & disown)
+pkill -SIGUSR1 kitty 2>/dev/null || true
+swaync-client -rs 2>/dev/null || true
+hyprctl reload >/dev/null 2>&1 || true
+
+# 4. gtk apply (write into ~/.config/gtk-3.0/colors.css already by matugen template)
+gsettings set org.gnome.desktop.interface gtk-theme "Adwaita-dark" 2>/dev/null || true
+
+notify-send "Theme switched" "$(basename "$WALL")" 2>/dev/null || true

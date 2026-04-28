@@ -1,0 +1,10 @@
+# minimal keymap — defaults are good, just add quick edit/open with nvim
+[[manager.prepend_keymap]]
+on  = [ "e" ]
+run = 'open --interactive'
+desc = "Open with chooser"
+
+[[manager.prepend_keymap]]
+on  = [ "E" ]
+run = 'shell --block --confirm "nvim $0"'
+desc = "Edit in nvim"

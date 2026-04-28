@@ -1,0 +1,99 @@
+# core wayland + hyprland
+hyprland
+hyprlock
+hypridle
+hyprpaper
+hyprpicker
+hyprshot
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+qt5-wayland
+qt6-wayland
+
+# audio
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+pavucontrol
+
+# auth + portal
+polkit-gnome
+
+# login (tui)
+greetd
+greetd-tuigreet
+
+# bar / launcher / notif
+waybar
+rofi-wayland
+swaync
+
+# term / file / utils
+kitty
+yazi
+btop
+fastfetch
+brightnessctl
+playerctl
+wl-clipboard
+cliphist
+grim
+slurp
+swappy
+
+# editor / ide / browser / vpn
+neovim
+xdg-utils
+
+# AUR (yay) — apps
+brave-bin
+vscodium-bin
+proton-vpn-gtk-app
+
+# fonts
+ttf-jetbrains-mono-nerd
+ttf-firacode-nerd
+noto-fonts
+noto-fonts-emoji
+noto-fonts-cjk
+
+# theme engine
+nwg-look
+kvantum
+qt5ct
+qt6ct
+papirus-icon-theme
+bibata-cursor-theme
+
+# hardening
+ufw
+apparmor
+audit
+linux-hardened
+linux-hardened-headers
+
+# kernel headers (DKMS needs these for both kernels)
+linux-headers
+
+# nvidia (5070 Ti / 4080 — Turing+ uses open kernel module)
+nvidia-open-dkms
+nvidia-utils
+nvidia-settings
+libva-nvidia-driver
+egl-wayland
+
+# 32-bit libs (steam / wine / native games)
+lib32-nvidia-utils
+lib32-mesa
+lib32-vulkan-icd-loader
+vulkan-icd-loader
+
+# bluetooth
+bluez
+bluez-utils
+blueman
+
+# AUR (yay) — core
+matugen-bin
+swww

@@ -1,0 +1,55 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "spacing": 6,
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["tray", "pulseaudio", "network", "cpu", "memory", "battery", "custom/notif"],
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "format-icons": {
+      "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
+      "active": "",
+      "default": ""
+    }
+  },
+  "hyprland/window": {
+    "max-length": 60,
+    "separate-outputs": true
+  },
+  "clock": {
+    "format": "{:%H:%M  %a %d %b}",
+    "tooltip-format": "<tt>{calendar}</tt>"
+  },
+  "cpu": { "format": " {usage}%" },
+  "memory": { "format": " {percentage}%" },
+  "battery": {
+    "states": { "warning": 30, "critical": 15 },
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "network": {
+    "format-wifi": " {essid}",
+    "format-ethernet": " ",
+    "format-disconnected": "睊",
+    "tooltip-format": "{ifname}: {ipaddr}"
+  },
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "婢",
+    "format-icons": { "default": ["", "", ""] },
+    "on-click": "pavucontrol"
+  },
+  "tray": { "spacing": 8 },
+  "custom/notif": {
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "format": "{}",
+    "return-type": "json",
+    "escape": true
+  }
+}

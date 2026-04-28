@@ -1,0 +1,46 @@
+@import "colors.css";
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: alpha(@background, 0.85);
+  color: @on_background;
+  border-bottom: 1px solid @surface;
+}
+
+#workspaces button {
+  padding: 0 8px;
+  color: @on_surface;
+  background: transparent;
+  border-radius: 6px;
+}
+#workspaces button.active {
+  background: @accent;
+  color: @on_accent;
+}
+#workspaces button:hover {
+  background: @surface;
+}
+
+#window, #clock, #cpu, #memory, #battery, #network, #pulseaudio, #tray, #custom-notif {
+  padding: 2px 10px;
+  margin: 4px 2px;
+  background: @surface;
+  color: @on_surface;
+  border-radius: 6px;
+}
+
+#clock {
+  background: @accent;
+  color: @on_accent;
+  font-weight: bold;
+}
+
+#battery.warning  { color: #e0af68; }
+#battery.critical { color: #f7768e; }

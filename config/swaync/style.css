@@ -1,0 +1,32 @@
+@import "colors.css";
+
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 13px;
+}
+
+.notification-row { background: transparent; }
+
+.notification {
+  background: alpha(@background, 0.95);
+  color: @on_background;
+  border: 1px solid @surface;
+  border-radius: 10px;
+  margin: 6px;
+  padding: 8px;
+}
+
+.notification.critical { border-color: #f7768e; }
+
+.summary { font-weight: bold; color: @accent; }
+.body    { color: @on_surface; }
+
+.control-center {
+  background: alpha(@background, 0.92);
+  border: 1px solid @surface;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+button { background: @surface; color: @on_surface; border-radius: 8px; padding: 4px 10px; }
+button:hover { background: @accent; color: @on_accent; }

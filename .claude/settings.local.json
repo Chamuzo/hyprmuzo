@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:asus-linux.org)",
+      "Bash(mv /c/Users/chamo/Documents/HyDE/hyprmuzo /c/Users/chamo/Documents/hyprmuzo)",
+      "Bash(mv /c/Users/chamo/Documents/HyDE/.claude /c/Users/chamo/Documents/hyprmuzo/.claude)",
+      "Read(//c/Users/chamo/Documents/**)"
+    ]
+  }
+}
