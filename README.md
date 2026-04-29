@@ -78,10 +78,14 @@ Add walls to `~/Pictures/walls/`. That's it.
 ## Hardening notes
 
 - ufw: deny incoming, allow outgoing
-- apparmor + auditd enabled
+- apparmor + auditd enabled (services). For AppArmor profiles to actually load, your bootloader must add `lsm=landlock,lockdown,yama,integrity,apparmor,bpf` to kernel cmdline. The installer does **not** edit your bootloader.
 - LUKS root assumed from archinstall step
 - greetd-tuigreet replaces SDDM (lighter, no Qt6 in login path)
 - Kernel mode `normal` installs `linux-hardened`; kernel mode `g14` leaves your current kernel untouched
+
+## Dark mode
+
+Whole system is dark by default (matugen `default_scheme = "dark"`). GTK3/4 use `adw-gtk3-dark`, icons `Papirus-Dark`, cursor `Bibata-Modern-Ice`. Each `themeswitch` re-applies palette + dark scheme via `gsettings`. Electron apps (brave, vscodium) get Wayland flags via `~/.config/{electron,brave,codium}-flags.conf`.
 
 ## Uninstall / restore
 

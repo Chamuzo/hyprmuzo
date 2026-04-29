@@ -19,6 +19,18 @@ pavucontrol
 
 # auth + portal
 polkit-gnome
+dbus
+
+# network
+networkmanager
+network-manager-applet
+
+# xdg dirs
+xdg-user-dirs
+
+# gtk theme (dark)
+adw-gtk-theme
+gsettings-desktop-schemas
 
 # login (tui)
 greetd

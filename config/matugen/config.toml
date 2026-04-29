@@ -3,6 +3,7 @@
 [config]
 reload_apps = false
 set_wallpaper = false
+default_scheme = "dark"
 
 [templates.hyprland]
 input_path = "~/.config/matugen/templates/colors-hypr.conf"

@@ -2,7 +2,7 @@
 
 * {
   background-color: transparent;
-  text-color: @on_background;
+  text-color: @on-background;
 }
 
 window {
@@ -23,7 +23,7 @@ inputbar {
 }
 
 prompt { text-color: @accent; }
-entry  { placeholder: "search…"; placeholder-color: @on_surface; }
+entry  { placeholder: "search…"; placeholder-color: @on-surface; }
 
 listview {
   lines: 8;
@@ -37,7 +37,7 @@ element {
 }
 element selected {
   background-color: @accent;
-  text-color: @on_accent;
+  text-color: @on-accent;
 }
 element-icon { size: 22px; background-color: transparent; }
 element-text { vertical-align: 0.5; }

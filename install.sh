@@ -128,13 +128,14 @@ sudo ufw enable || true
 sudo systemctl enable apparmor.service || true
 sudo systemctl enable auditd.service || true
 sudo systemctl enable bluetooth.service || true
+sudo systemctl enable NetworkManager.service || true
 
 # greetd config
 log "Configure greetd (tuigreet)"
 if [[ "$INSTALL_MODE" == "vm" ]]; then
-  HYPRLAND_CMD='env WLR_RENDERER_ALLOW_SOFTWARE=1 LIBGL_ALWAYS_SOFTWARE=1 MESA_LOADER_DRIVER_OVERRIDE=llvmpipe Hyprland'
+  HYPRLAND_CMD='dbus-run-session env WLR_RENDERER_ALLOW_SOFTWARE=1 LIBGL_ALWAYS_SOFTWARE=1 MESA_LOADER_DRIVER_OVERRIDE=llvmpipe Hyprland'
 else
-  HYPRLAND_CMD='Hyprland'
+  HYPRLAND_CMD='dbus-run-session Hyprland'
 fi
 
 sudo tee /etc/greetd/config.toml >/dev/null <<EOF
@@ -149,7 +150,8 @@ sudo systemctl enable greetd.service
 
 # --- 5. dotfiles
 log "Deploy configs to ${CFG}"
-mkdir -p "$CFG" "$LOCAL_BIN" "$WALL_DIR"
+mkdir -p "$CFG" "$LOCAL_BIN" "$WALL_DIR" "${USER_HOME}/Pictures/Screenshots"
+xdg-user-dirs-update 2>/dev/null || true
 
 for d in hypr waybar rofi kitty swaync matugen yazi nvim; do
   rm -rf "${CFG}/${d}.bak"
@@ -159,6 +161,18 @@ done
 
 sed -i "s/^    kb_layout = .*/    kb_layout = ${KEYBOARD_LAYOUT}/" "${CFG}/hypr/hyprland.conf"
 sed -i '/^    kb_options = /d' "${CFG}/hypr/hyprland.conf"
+
+# colors.conf fallback so Hyprland source line never fails before first matugen run
+if [[ ! -f "${CFG}/hypr/colors.conf" ]]; then
+  cat > "${CFG}/hypr/colors.conf" <<'EOF'
+$background = rgb(1c1b1f)
+$on_background = rgb(e6e1e5)
+$surface = rgb(2b292d)
+$on_surface = rgb(c9c5ca)
+$accent = rgb(c8bfff)
+$on_accent = rgb(31298a)
+EOF
+fi
 
 install -Dm755 "${REPO_DIR}/bin/themeswitch" "${LOCAL_BIN}/themeswitch"
 
@@ -173,6 +187,37 @@ grep -q '^export EDITOR='  "$BRC" || echo 'export EDITOR=nvim'  >> "$BRC"
 grep -q '^export VISUAL='  "$BRC" || echo 'export VISUAL=nvim'  >> "$BRC"
 grep -q '^export BROWSER=' "$BRC" || echo 'export BROWSER=brave' >> "$BRC"
 grep -q 'alias vi='        "$BRC" || echo 'alias vi=nvim; alias vim=nvim' >> "$BRC"
+
+# wayland flags for electron apps (brave, vscodium)
+cat > "${USER_HOME}/.config/electron-flags.conf" <<'EOF'
+--enable-features=UseOzonePlatform,WaylandWindowDecorations
+--ozone-platform=wayland
+EOF
+cp "${USER_HOME}/.config/electron-flags.conf" "${USER_HOME}/.config/brave-flags.conf"
+cp "${USER_HOME}/.config/electron-flags.conf" "${USER_HOME}/.config/codium-flags.conf"
+
+# --- 6a. system-wide dark mode (GTK3/4 + cursor + Qt platformtheme)
+log "Configure dark mode (GTK + cursor + Qt)"
+mkdir -p "${CFG}/gtk-3.0" "${CFG}/gtk-4.0"
+cat > "${CFG}/gtk-3.0/settings.ini" <<EOF
+[Settings]
+gtk-theme-name=adw-gtk3-dark
+gtk-icon-theme-name=Papirus-Dark
+gtk-cursor-theme-name=Bibata-Modern-Ice
+gtk-cursor-theme-size=24
+gtk-application-prefer-dark-theme=1
+gtk-font-name=JetBrainsMono Nerd Font 11
+EOF
+cp "${CFG}/gtk-3.0/settings.ini" "${CFG}/gtk-4.0/settings.ini"
+ln -sf /usr/share/themes/adw-gtk3-dark "${CFG}/gtk-4.0/gtk-4.0" 2>/dev/null || true
+
+# user dconf defaults (applied at login)
+mkdir -p "${CFG}/dconf"
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark'  2>/dev/null || true
+gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark'  2>/dev/null || true
+gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice' 2>/dev/null || true
+gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null || true
 
 # --- 6b. xdg mimeapps defaults
 log "Set xdg default apps (browser, editor, file mgr)"
