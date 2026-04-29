@@ -70,11 +70,8 @@ bibata-cursor-theme
 ufw
 apparmor
 audit
-linux-hardened
-linux-hardened-headers
 
-# kernel headers (DKMS needs these for both kernels)
-linux-headers
+# kernel packages are selected by install.sh
 
 # graphics drivers are intentionally omitted; install GPU/VM drivers yourself
 

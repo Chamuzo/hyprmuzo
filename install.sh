@@ -8,6 +8,8 @@ CFG="${USER_HOME}/.config"
 LOCAL_BIN="${USER_HOME}/.local/bin"
 WALL_DIR="${USER_HOME}/Pictures/walls"
 INSTALL_MODE=""
+KERNEL_MODE=""
+KEYBOARD_LAYOUT=""
 
 log() { printf '\033[1;36m[hyprmuzo]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[error]\033[0m %s\n' "$*" >&2; exit 1; }
@@ -17,10 +19,18 @@ command -v pacman >/dev/null || die "Not Arch."
 
 usage() {
   cat <<EOF
-Usage: ./install.sh [--normal|--vm]
+Usage: ./install.sh [--normal|--vm] [--kernel-normal|--kernel-g14] [--keyboard-es|--keyboard-us]
 
   --normal  Install normal Hyprland session
   --vm      Install VM-friendly session with software-render launch env
+  --kernel-normal
+            Install linux-hardened + headers
+  --kernel-g14
+            Do not install or change kernel packages
+  --keyboard-es
+            Use Spanish keyboard layout
+  --keyboard-us
+            Use US keyboard layout
 EOF
 }
 
@@ -28,6 +38,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --normal) INSTALL_MODE="normal" ;;
     --vm) INSTALL_MODE="vm" ;;
+    --kernel-normal) KERNEL_MODE="normal" ;;
+    --kernel-g14|--g14) KERNEL_MODE="g14" ;;
+    --keyboard-es|--es) KEYBOARD_LAYOUT="es" ;;
+    --keyboard-us|--us) KEYBOARD_LAYOUT="us" ;;
     -h|--help) usage; exit 0 ;;
     *) die "Unknown option: $1" ;;
   esac
@@ -47,6 +61,34 @@ if [[ -z "$INSTALL_MODE" ]]; then
 fi
 
 log "Install mode: ${INSTALL_MODE}"
+
+if [[ -z "$KERNEL_MODE" ]]; then
+  printf '\nSelect kernel mode:\n'
+  printf '  1) normal - install linux-hardened + headers\n'
+  printf '  2) g14    - keep your existing ASUS G14 kernel untouched\n'
+  read -r -p 'Kernel mode [1/2]: ' kernel_choice
+  case "$kernel_choice" in
+    1|normal|NORMAL) KERNEL_MODE="normal" ;;
+    2|g14|G14) KERNEL_MODE="g14" ;;
+    *) die "Invalid kernel mode." ;;
+  esac
+fi
+
+log "Kernel mode: ${KERNEL_MODE}"
+
+if [[ -z "$KEYBOARD_LAYOUT" ]]; then
+  printf '\nSelect keyboard layout:\n'
+  printf '  1) es - Spanish\n'
+  printf '  2) us - US English\n'
+  read -r -p 'Keyboard layout [1/2]: ' keyboard_choice
+  case "$keyboard_choice" in
+    1|es|ES|spanish|Spanish) KEYBOARD_LAYOUT="es" ;;
+    2|us|US|eeuu|EEUU) KEYBOARD_LAYOUT="us" ;;
+    *) die "Invalid keyboard layout." ;;
+  esac
+fi
+
+log "Keyboard layout: ${KEYBOARD_LAYOUT}"
 
 # --- 1. system update + base
 log "Enable [multilib] repo (32-bit packages)"
@@ -72,6 +114,9 @@ fi
 # --- 3. packages
 log "Install pacman + AUR packages"
 mapfile -t PKGS < <(grep -v '^\s*#' "${REPO_DIR}/packages.txt" | grep -v '^\s*$')
+if [[ "$KERNEL_MODE" == "normal" ]]; then
+  PKGS+=(linux-hardened linux-hardened-headers linux-headers)
+fi
 yay -S --needed --noconfirm "${PKGS[@]}"
 
 # --- 4. services
@@ -111,6 +156,9 @@ for d in hypr waybar rofi kitty swaync matugen yazi nvim; do
   [[ -e "${CFG}/${d}" ]] && mv "${CFG}/${d}" "${CFG}/${d}.bak"
   cp -r "${REPO_DIR}/config/${d}" "${CFG}/${d}"
 done
+
+sed -i "s/^    kb_layout = .*/    kb_layout = ${KEYBOARD_LAYOUT}/" "${CFG}/hypr/hyprland.conf"
+sed -i '/^    kb_options = /d' "${CFG}/hypr/hyprland.conf"
 
 install -Dm755 "${REPO_DIR}/bin/themeswitch" "${LOCAL_BIN}/themeswitch"
 
@@ -164,7 +212,13 @@ fi
 log "Generate initial theme from default wall"
 DEFAULT_WALL="$(find "$WALL_DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.png' \) | head -n1 || true)"
 if [[ -n "$DEFAULT_WALL" ]]; then
-  "${LOCAL_BIN}/themeswitch" "$DEFAULT_WALL" || log "themeswitch first run failed (matugen may need login session)"
+  mkdir -p "${CFG}/gtk-3.0" "${CFG}/gtk-4.0"
+  cat > "${CFG}/hypr/hyprpaper.conf" <<EOF
+preload = $DEFAULT_WALL
+wallpaper = ,$DEFAULT_WALL
+splash = false
+EOF
+  matugen image "$DEFAULT_WALL" || log "initial color generation failed; run themeswitch after logging into Hyprland"
 fi
 
 log "Done. Reboot, login via tuigreet → Hyprland."

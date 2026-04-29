@@ -8,7 +8,7 @@ Minimal HyDE-aesthetic Hyprland setup for Arch. No bloat.
 - Hyprland + hyprlock + hypridle + swww
 - Waybar, Rofi, Kitty, swaync, Yazi
 - Matugen → wall in, full theme out (waybar, kitty, rofi, swaync, gtk, hyprland borders)
-- Hardened base: ufw, apparmor, audit, linux-hardened, greetd+tuigreet
+- Hardened base: ufw, apparmor, audit, optional linux-hardened, greetd+tuigreet
 - One script: `themeswitch <wall>` reloads everything
 
 ## Pre-install (Arch base)
@@ -29,14 +29,19 @@ chmod +x install.sh bin/themeswitch
 ./install.sh
 ```
 
-At startup the installer asks for `normal` or `vm` mode. You can skip the prompt with:
+At startup the installer asks for session mode (`normal` or `vm`), kernel mode (`normal` or `g14`), and keyboard layout (`es` or `us`). You can skip the prompts with:
 
 ```bash
-./install.sh --normal
-./install.sh --vm
+./install.sh --normal --kernel-normal --keyboard-es
+./install.sh --normal --kernel-g14 --keyboard-es
+./install.sh --vm --kernel-g14 --keyboard-us
 ```
 
 The installer does not install or configure graphics drivers. Install GPU/VM drivers yourself before rebooting. VM mode only changes the Hyprland launch command so greetd starts it with software-render environment variables.
+
+Kernel mode `normal` installs `linux-hardened`, `linux-hardened-headers`, and `linux-headers`. Kernel mode `g14` does not install or change kernel packages, so your ASUS G14 kernel stays under your control.
+
+Keyboard layout `es` configures a Spanish keyboard. Keyboard layout `us` configures a US English keyboard.
 
 Drop wallpapers into `~/Pictures/walls/` then reboot.
 Login via tuigreet → Hyprland.
@@ -76,7 +81,7 @@ Add walls to `~/Pictures/walls/`. That's it.
 - apparmor + auditd enabled
 - LUKS root assumed from archinstall step
 - greetd-tuigreet replaces SDDM (lighter, no Qt6 in login path)
-- Run `linux-hardened` kernel by default — add as fallback in bootloader
+- Kernel mode `normal` installs `linux-hardened`; kernel mode `g14` leaves your current kernel untouched
 
 ## Uninstall / restore
 
