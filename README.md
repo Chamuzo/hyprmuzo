@@ -29,6 +29,15 @@ chmod +x install.sh bin/themeswitch
 ./install.sh
 ```
 
+At startup the installer asks for `normal` or `vm` mode. You can skip the prompt with:
+
+```bash
+./install.sh --normal
+./install.sh --vm
+```
+
+The installer does not install or configure graphics drivers. Install GPU/VM drivers yourself before rebooting. VM mode only changes the Hyprland launch command so greetd starts it with software-render environment variables.
+
 Drop wallpapers into `~/Pictures/walls/` then reboot.
 Login via tuigreet → Hyprland.
 

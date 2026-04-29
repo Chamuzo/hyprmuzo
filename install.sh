@@ -7,12 +7,46 @@ USER_HOME="${HOME}"
 CFG="${USER_HOME}/.config"
 LOCAL_BIN="${USER_HOME}/.local/bin"
 WALL_DIR="${USER_HOME}/Pictures/walls"
+INSTALL_MODE=""
 
 log() { printf '\033[1;36m[hyprmuzo]\033[0m %s\n' "$*"; }
 die() { printf '\033[1;31m[error]\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ $EUID -eq 0 ]] && die "Run as user, not root. sudo prompted when needed."
 command -v pacman >/dev/null || die "Not Arch."
+
+usage() {
+  cat <<EOF
+Usage: ./install.sh [--normal|--vm]
+
+  --normal  Install normal Hyprland session
+  --vm      Install VM-friendly session with software-render launch env
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --normal) INSTALL_MODE="normal" ;;
+    --vm) INSTALL_MODE="vm" ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "Unknown option: $1" ;;
+  esac
+  shift
+done
+
+if [[ -z "$INSTALL_MODE" ]]; then
+  printf '\nSelect install mode:\n'
+  printf '  1) normal - bare metal / GPU configured by you\n'
+  printf '  2) vm     - virtual machine, software-render launch env\n'
+  read -r -p 'Mode [1/2]: ' mode_choice
+  case "$mode_choice" in
+    1|normal|NORMAL) INSTALL_MODE="normal" ;;
+    2|vm|VM) INSTALL_MODE="vm" ;;
+    *) die "Invalid mode." ;;
+  esac
+fi
+
+log "Install mode: ${INSTALL_MODE}"
 
 # --- 1. system update + base
 log "Enable [multilib] repo (32-bit packages)"
@@ -50,21 +84,20 @@ sudo systemctl enable apparmor.service || true
 sudo systemctl enable auditd.service || true
 sudo systemctl enable bluetooth.service || true
 
-# --- 4b. nvidia kernel + early KMS
-log "Configure nvidia (modules + KMS)"
-sudo sed -i 's/^MODULES=(.*)$/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm)/' /etc/mkinitcpio.conf
-sudo install -d /etc/modprobe.d
-echo 'options nvidia_drm modeset=1 fbdev=1' | sudo tee /etc/modprobe.d/nvidia.conf >/dev/null
-sudo mkinitcpio -P
-
 # greetd config
 log "Configure greetd (tuigreet)"
+if [[ "$INSTALL_MODE" == "vm" ]]; then
+  HYPRLAND_CMD='env WLR_RENDERER_ALLOW_SOFTWARE=1 LIBGL_ALWAYS_SOFTWARE=1 MESA_LOADER_DRIVER_OVERRIDE=llvmpipe Hyprland'
+else
+  HYPRLAND_CMD='Hyprland'
+fi
+
 sudo tee /etc/greetd/config.toml >/dev/null <<EOF
 [terminal]
 vt = 1
 
 [default_session]
-command = "tuigreet --time --remember --asterisks --cmd Hyprland"
+command = "tuigreet --time --remember --asterisks --cmd '${HYPRLAND_CMD}'"
 user = "greeter"
 EOF
 sudo systemctl enable greetd.service
